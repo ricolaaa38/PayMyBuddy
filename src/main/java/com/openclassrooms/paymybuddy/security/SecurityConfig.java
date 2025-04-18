@@ -15,12 +15,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/users/register", "/api/users/login", "/api/users/find", "/api/transactions/create", "/api/transactions/sender", "/api/transactions/receiver", "/api/users-connections/create", "/api/users-connections/").permitAll()
+                                .requestMatchers("/styles/style.css", "/login", "/register", "/api/users/register", "/api/users/login",
+                                        "/api/users/find", "/api/users/update", "/api/users/delete", "/api/transactions/create",
+                                        "/api/transactions/sender", "/api/transactions/receiver",
+                                        "/api/users-connections/create", "/api/users-connections/", "/api/users-connections/delete").permitAll()
                                 .anyRequest().authenticated()
-                );
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll()
+                );;
         return http.build();
     }
 

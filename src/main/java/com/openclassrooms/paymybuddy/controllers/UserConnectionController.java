@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.controllers;
 
 import com.openclassrooms.paymybuddy.exception.ControllerException;
+import com.openclassrooms.paymybuddy.exception.ServiceException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.model.UserConnection;
 import com.openclassrooms.paymybuddy.service.UserConnectionService;
@@ -27,15 +28,36 @@ public class UserConnectionController {
         try {
             UserConnection addUserConnection = userConnectionService.saveUserConnection(userConnection);
             return ResponseEntity.status(HttpStatus.CREATED).body(addUserConnection);
-        } catch (Exception e) {
+        } catch (ServiceException e) {
             throw new ControllerException("Failed to create users connection: " + e.getMessage(), e);
         }
     }
 
     @GetMapping("/")
     public ResponseEntity<List<UserConnection>> getUser1Connections(@RequestParam int user1Id) {
-        User user1 = userService.getUserById(user1Id).orElseThrow(() -> new RuntimeException("User not found"));
-        List<UserConnection> userConnections = userConnectionService.getUser1Connection(user1);
-        return ResponseEntity.ok(userConnections);
+        try {
+            User user1 = userService.getUserById(user1Id)
+                    .orElseThrow(() -> new ControllerException("User not found with Id: " + user1Id));
+            List<UserConnection> userConnections = userConnectionService.getUser1Connection(user1);
+            return ResponseEntity.ok(userConnections);
+        } catch (ServiceException e) {
+            throw new ControllerException("Failed to retrieve user connections: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUserConnection(@RequestParam String user1Email, @RequestParam String user2Email) {
+        try {
+            User user1 = userConnectionService.verifyUserByEmail(user1Email);
+            User user2 = userConnectionService.verifyUserByEmail(user2Email);
+
+            UserConnection connection = userConnectionService.getUserConnectionByUsers(user1, user2)
+                    .orElseThrow(() -> new ControllerException("Connection not found between the specified users"));
+
+            userConnectionService.deleteUserConnection(connection);
+            return ResponseEntity.ok("Connection successfully deleted");
+        } catch (ServiceException e) {
+            throw new ControllerException("Failed to delete user connection: " + e.getMessage());
+        }
     }
 }

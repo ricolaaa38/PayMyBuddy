@@ -13,12 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -50,15 +46,13 @@ public class UserControllerTestIT {
     }
 
     @Test
-    public void testRegisterUser() throws Exception {
-
-        String jsonContent = objectMapper.writeValueAsString(testUser);
-        System.out.println("JSON Content: " + jsonContent);
-
+    public void testRegisterUserSuccess() throws Exception {
         mockMvc.perform(post("/api/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
-                .andExpect(status().isCreated());
+                        .param("email", testUser.getEmail())
+                        .param("username", testUser.getUsername())
+                        .param("password", testUser.getPassword()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test
@@ -83,12 +77,41 @@ public class UserControllerTestIT {
 
         userService.saveUser(testUser);
 
-        Optional<User> savedUser = Optional.ofNullable(userRepository.findByEmail("testuser@example.com"));
-        assertTrue(savedUser.isPresent());
-
         mockMvc.perform(post("/api/users/login")
                         .param("email", "testuser@example.com")
                         .param("password", "password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/home"));
+    }
+
+    @Test
+    public void testUpdateUser() throws Exception {
+
+        Integer existingUserId = userService.saveUser(testUser).getId();
+
+        User updatedUser = new User();
+        updatedUser.setId(existingUserId);
+        updatedUser.setUsername("updateduser");
+        updatedUser.setEmail("updateduser@example.com");
+        updatedUser.setPassword("newpassword");
+
+        String jsonContent = objectMapper.writeValueAsString(updatedUser);
+
+        mockMvc.perform(put("/api/users/update")
+                        .param("email", testUser.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonContent))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.username").value("updateduser"))
+                .andExpect(jsonPath("$.email").value("updateduser@example.com"));
+    }
+
+    @Test
+    public void testDeleteUserSuccess() throws Exception {
+        userService.saveUser(testUser);
+        mockMvc.perform(delete("/api/users/delete")
+                .param("email", "testuser@example.com"))
                 .andExpect(status().isOk());
     }
 }

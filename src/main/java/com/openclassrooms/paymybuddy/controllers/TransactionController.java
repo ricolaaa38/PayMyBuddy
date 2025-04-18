@@ -1,5 +1,6 @@
 package com.openclassrooms.paymybuddy.controllers;
 
+import com.openclassrooms.paymybuddy.exception.ControllerException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.TransactionService;
@@ -31,14 +32,14 @@ public class TransactionController {
 
     @GetMapping("/sender")
     public ResponseEntity<List<Transaction>> getTransactionsBySender(@RequestParam int senderId) {
-        User sender = userService.getUserById(senderId).orElseThrow(() -> new RuntimeException("Sender not found"));
+        User sender = userService.getUserById(senderId).orElseThrow(() -> new ControllerException("Sender not found with id: " + senderId));
         List<Transaction> transactions = transactionService.getTransactionBySender(sender);
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/receiver")
     public ResponseEntity<List<Transaction>> getTransactionsByReceiver(@RequestParam int receiverId) {
-        User receiver = userService.getUserById(receiverId).orElseThrow(() -> new RuntimeException("Receiver not found"));
+        User receiver = userService.getUserById(receiverId).orElseThrow(() -> new ControllerException("Receiver not found with id: " + receiverId));
         List<Transaction> transactions = transactionService.getTransactionByReceiver(receiver);
         return ResponseEntity.ok(transactions);
     }

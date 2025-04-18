@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openclassrooms.paymybuddy.controllers.UserController;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.model.UserConnection;
 import com.openclassrooms.paymybuddy.repository.UserConnectionRepository;
@@ -16,8 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -88,4 +88,16 @@ public class UserConnectionControllerTestIT {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+
+    @Test
+    public void testDeleteUserConnection() throws Exception {
+        userConnectionService.saveUserConnection(testUserConnection);
+
+        mockMvc.perform(delete("/api/users-connections/delete")
+                        .param("user1Email", user1.getEmail())
+                        .param("user2Email", user2.getEmail()))
+                .andExpect(status().isOk());
+    }
+
+
 }

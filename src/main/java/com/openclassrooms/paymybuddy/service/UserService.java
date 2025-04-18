@@ -5,11 +5,9 @@ import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.UserRepository;
 import com.openclassrooms.paymybuddy.security.PasswordEncoderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 @Service
 public class UserService {
@@ -24,7 +22,7 @@ public class UserService {
         try {
             return userRepository.findAll();
         } catch (Exception e) {
-            throw new ServiceException("No user was found", e);
+            throw new ServiceException("No user were found", e);
         }
     }
 
@@ -54,22 +52,45 @@ public class UserService {
         }
     }
 
-    public boolean authenticateUser(String email, String password) {
-        return getUserByEmail(email)
-                .map(user -> {
-                    if (passwordEncoderService.matches(password, user.getPassword())) {
-                        return true;
-                    } else {
-                        throw new ServiceException("Invalid password for user: " + email);
-                    }
-                })
-                .orElseThrow(() -> new ServiceException("User not found with email: " + email));
+    public boolean comparePasswords(String rawPassword, String encodedPassword) {
+        return passwordEncoderService.matches(rawPassword, encodedPassword);
+    }
+
+    public User updateUser(User updatedUser, User previousUserInfo ) {
+        try {
+            if (updatedUser.getId() == null) {
+                throw new ServiceException("User ID is required for updating user information");
+            }
+            boolean isModified = false;
+
+            if (updatedUser.getEmail() != null && !updatedUser.getEmail().equals(previousUserInfo.getEmail())) {
+                previousUserInfo.setEmail(updatedUser.getEmail());
+                isModified = true;
+            }
+            if (updatedUser.getUsername() != null && !updatedUser.getUsername().equals(previousUserInfo.getUsername())) {
+                previousUserInfo.setUsername(updatedUser.getUsername());
+                isModified = true;
+            }
+            if (updatedUser.getPassword() != null  && !passwordEncoderService.matches(updatedUser.getPassword(), previousUserInfo.getPassword())) {
+                    previousUserInfo.setPassword(passwordEncoderService.encode(updatedUser.getPassword()));
+                    isModified = true;
+            }
+
+            if (isModified) {
+                return userRepository.save(previousUserInfo);
+            } else {
+                throw new ServiceException("No changes detected to update the user");
+            }
+        } catch (Exception e) {
+            throw new ServiceException("Failed to update user", e);
+        }
+    }
+
+    public void deleteUser(User user) {
+        try {
+            userRepository.delete(user);
+        } catch (Exception e) {
+            throw new ServiceException("Failed to delete user", e);
+        }
     }
 }
-
-//    Function<Integer, Integer> f = new Function<Integer, Integer>() {
-//        @Override
-//        public Integer apply(Integer integer) {
-//            return integer * 2;
-//        }
-//    };
