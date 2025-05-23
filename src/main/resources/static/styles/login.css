@@ -96,6 +96,13 @@ form {
     background-color: #0056b3;
 }
 
+.messages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20px;
+}
+
 .error-msg {
     color: red;
     font-size: 0.9em;

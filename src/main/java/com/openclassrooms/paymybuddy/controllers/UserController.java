@@ -5,12 +5,19 @@ import com.openclassrooms.paymybuddy.exception.ControllerException;
 import com.openclassrooms.paymybuddy.exception.ServiceException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
 
@@ -21,19 +28,22 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     @PostMapping("/register")
     public String registerUser(@ModelAttribute User user, Model model) {
         if (userService.getUserByEmail(user.getEmail()).isPresent()) {
             model.addAttribute("error", "Cet email est déjà utilisé.");
-            return "register"; // Retourne la page d'inscription avec un message d'erreur
+            return "register";
         }
         try {
             userService.saveUser(user);
             model.addAttribute("success", "Inscription réussie. Vous pouvez maintenant vous connecter.");
-            return "redirect:/login"; // Redirige vers la page de connexion
+            return "redirect:/login";
         } catch (Exception e) {
             model.addAttribute("error", "Une erreur est survenue lors de l'inscription.");
-            return "register"; // Retourne la page d'inscription avec un message d'erreur
+            return "register";
         }
     }
 
@@ -44,34 +54,51 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestParam String email, @RequestParam String password, Model model) {
+    public String loginUser(@RequestParam String email,
+                            @RequestParam String password,
+                            HttpServletRequest request,
+                            Model model) {
         try {
-            User user = userService.getUserByEmail(email)
-                    .orElseThrow(() -> new ControllerException("Utilisateur introuvable avec cet email : " + email));
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(email, password);
+            Authentication auth = authenticationManager.authenticate(authToken);
 
-            if (userService.comparePasswords(password, user.getPassword())) {
-                model.addAttribute("success", "Connexion réussie !");
-                return "redirect:/home";
-            } else {
-                model.addAttribute("error", "Mot de passe invalide.");
-                return "login";
-            }
-        } catch (ControllerException e) {
-            model.addAttribute("error", e.getMessage());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            request.getSession().setAttribute(
+                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    SecurityContextHolder.getContext()
+            );
+
+            return "redirect:/home";
+        } catch (Exception ex) {
+            model.addAttribute("error", "Email ou mot de passe invalide.");
             return "login";
         }
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<User> updateUser(@RequestBody User updateUser, @RequestParam String email) {
+    @PostMapping("/update")
+    public String updateUser(@ModelAttribute User updateUser, RedirectAttributes redirectAttributes) {
         try {
-            User previousUserInfo = userService.getUserByEmail(email)
-                    .orElseThrow(() -> new ControllerException("User not found with email: " + email));
+            Integer userId = updateUser.getId();
+            if (userId == null) {
+                throw new ControllerException("L'ID de l'utilisateur est requis pour la mise à jour.");
+            }
+            User previousUserInfo = userService.getUserById(userId)
+                    .orElseThrow(() -> new ControllerException("Utilisateur introuvable avec id: " + userId));
+
             User updatedUser = userService.updateUser(updateUser, previousUserInfo);
-            return ResponseEntity.ok(updatedUser);
-        } catch (ServiceException e) {
-            throw new ControllerException("Error while updating user: " + e.getMessage(), e);
+            if (updatedUser == null) {
+                redirectAttributes.addFlashAttribute("error", "Veuillez modifier un élément !");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "Mise à jour réussie !");
+            }
+            return "redirect:/profil";
+        } catch (ControllerException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "profil";
         }
+
     }
 
     @DeleteMapping("/delete")

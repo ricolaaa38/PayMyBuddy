@@ -7,13 +7,14 @@ import com.openclassrooms.paymybuddy.model.UserConnection;
 import com.openclassrooms.paymybuddy.service.UserConnectionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api/users-connections")
 public class UserConnectionController {
 
@@ -24,13 +25,32 @@ public class UserConnectionController {
     private UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<UserConnection> createUserConnection(@RequestBody UserConnection userConnection) {
+    public String createUserConnection(@RequestParam int user1id, @RequestParam String user2Email, RedirectAttributes redirectAttributes) {
         try {
-            UserConnection addUserConnection = userConnectionService.saveUserConnection(userConnection);
-            return ResponseEntity.status(HttpStatus.CREATED).body(addUserConnection);
-        } catch (ServiceException e) {
-            throw new ControllerException("Failed to create users connection: " + e.getMessage(), e);
+            UserConnection userConnection = getUserConnection(user1id, user2Email);
+            saveUserConnection(userConnection);
+            redirectAttributes.addFlashAttribute("success", "Connexion ajoutée avec succès !");
+            return "redirect:/connection";
+        } catch (ServiceException | ControllerException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/connection";
         }
+    }
+
+    private void saveUserConnection(UserConnection userConnection) {
+        userConnectionService.saveUserConnection(userConnection);
+    }
+
+    private UserConnection getUserConnection(int user1id, String user2Email) {
+        User user1 = userService.getUserById(user1id)
+                .orElseThrow(() -> new ControllerException("Utilisateur connecté introuvable avec l'ID: " + user1id));
+        User user2 = userService.getUserByEmail(user2Email)
+                .orElseThrow(() -> new ControllerException("Utilisateur introuvable avec l'email: " + user2Email));
+
+        UserConnection userConnection = new UserConnection();
+        userConnection.setUser1(user1);
+        userConnection.setUser2(user2);
+        return userConnection;
     }
 
     @GetMapping("/")

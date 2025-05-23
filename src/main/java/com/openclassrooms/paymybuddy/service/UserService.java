@@ -4,6 +4,10 @@ import com.openclassrooms.paymybuddy.exception.ServiceException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.UserRepository;
 import com.openclassrooms.paymybuddy.security.PasswordEncoderService;
+import org.apache.catalina.util.StringUtil;
+import org.apache.tomcat.util.buf.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +21,7 @@ public class UserService {
     @Autowired
     private PasswordEncoderService passwordEncoderService;
 
+//    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public Iterable<User> getUsers() {
         try {
@@ -58,20 +63,24 @@ public class UserService {
 
     public User updateUser(User updatedUser, User previousUserInfo ) {
         try {
+
+//            logger.debug("Received updatedUser: {}", updatedUser);
+//            logger.debug("Existing previousUserInfo: {}", previousUserInfo);
+
             if (updatedUser.getId() == null) {
                 throw new ServiceException("User ID is required for updating user information");
             }
             boolean isModified = false;
 
-            if (updatedUser.getEmail() != null && !updatedUser.getEmail().equals(previousUserInfo.getEmail())) {
+            if (updatedUser.getEmail() != null && !updatedUser.getEmail().isEmpty() && !updatedUser.getEmail().equals(previousUserInfo.getEmail())) {
                 previousUserInfo.setEmail(updatedUser.getEmail());
                 isModified = true;
             }
-            if (updatedUser.getUsername() != null && !updatedUser.getUsername().equals(previousUserInfo.getUsername())) {
+            if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty() && !updatedUser.getUsername().equals(previousUserInfo.getUsername())) {
                 previousUserInfo.setUsername(updatedUser.getUsername());
                 isModified = true;
             }
-            if (updatedUser.getPassword() != null  && !passwordEncoderService.matches(updatedUser.getPassword(), previousUserInfo.getPassword())) {
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty() && !passwordEncoderService.matches(updatedUser.getPassword(), previousUserInfo.getPassword())) {
                     previousUserInfo.setPassword(passwordEncoderService.encode(updatedUser.getPassword()));
                     isModified = true;
             }
@@ -79,7 +88,7 @@ public class UserService {
             if (isModified) {
                 return userRepository.save(previousUserInfo);
             } else {
-                throw new ServiceException("No changes detected to update the user");
+               return null;
             }
         } catch (Exception e) {
             throw new ServiceException("Failed to update user", e);

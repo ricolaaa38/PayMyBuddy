@@ -1,0 +1,160 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+}
+/**
+* Header styles
+*/
+header {
+    padding: 10px 25px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 2em;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+}
+
+nav a.active {
+    color: #207FEE;
+}
+
+nav a {
+    color: black;
+    font-size: 1.2em;
+    text-decoration: none;
+}
+
+/**
+* Container de formulaire de transfert
+*/
+.create-transaction-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 100px 0;
+}
+
+form {
+position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.form-inputs {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.label-and-input select,
+.label-and-input input[type="text"],
+.label-and-input input[type="number"] {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    width: 250px;
+}
+
+.submit-btn-container button {
+    padding: 12px 25px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.submit-btn-container button:hover {
+    background-color: #186ad4;
+}
+
+/**
+* Messages
+*/
+.messages {
+    position: absolute;
+    bottom: -50px;
+    left: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+    height: 40px;
+}
+
+.error-msg {
+    color: red;
+    font-size: 0.9em;
+}
+
+.success-msg {
+    color: green;
+    font-size: 0.9em;
+}
+
+/**
+* Tableau des transactions
+*/
+.list-transaction-container {
+    background-color: white;
+    margin: 100px auto;
+    width: 90%;
+    max-width: 900px;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.list-transaction-container h2 {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.table-wrapper {
+    height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table-wrapper thead th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+}
+
+thead {
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+}
+tbody tr {
+  border-bottom: 1px solid #ddd;
+}
+th, td {
+    padding: 12px 8px;
+}
+
+td:last-child {
+    text-align: right;
+}

@@ -39,4 +39,5 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserConnection> connectionAsUser2;
+
 }

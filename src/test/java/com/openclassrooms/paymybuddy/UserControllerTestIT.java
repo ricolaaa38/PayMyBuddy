@@ -97,7 +97,7 @@ public class UserControllerTestIT {
 
         String jsonContent = objectMapper.writeValueAsString(updatedUser);
 
-        mockMvc.perform(put("/api/users/update")
+        mockMvc.perform(post("/api/users/update")
                         .param("email", testUser.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonContent))
