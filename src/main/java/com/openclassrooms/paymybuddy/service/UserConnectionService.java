@@ -25,7 +25,7 @@ public class UserConnectionService {
                 userConnection.getUser2()
         );
         if (existingConnection.isPresent()) {
-            throw new ServiceException("This connexion already exist!");
+            throw new ServiceException("Cette relation existe déjà!");
         }
         return userConnectionRepository.save(userConnection);
     }
@@ -34,7 +34,7 @@ public class UserConnectionService {
         try {
             return userConnectionRepository.findByUser1(user1);
         } catch (Exception e) {
-            throw new ServiceException("Failed to get the User connection's list", e);
+            throw new ServiceException("Échec lors de la récupération des relations", e);
         }
     }
 
@@ -42,13 +42,13 @@ public class UserConnectionService {
         try {
             return userConnectionRepository.findByUser1AndUser2(user1, user2);
         } catch (Exception e) {
-            throw new ServiceException("Failed to retrieve user connection by users", e);
+            throw new ServiceException("Échec lors de la récupération des relations", e);
         }
     }
 
     public User verifyUserByEmail(String email) {
         return userService.getUserByEmail(email)
-                .orElseThrow(() -> new ServiceException("User not found with email: " + email));
+                .orElseThrow(() -> new ServiceException("Utilisateur non trouvé avec l'email: " + email));
     }
 
 
@@ -56,7 +56,7 @@ public class UserConnectionService {
         try {
             userConnectionRepository.delete(userConnection);
         } catch (Exception e) {
-            throw new ServiceException("Failed to delete user connection", e);
+            throw new ServiceException("Échec de suppression de compte", e);
         }
     }
 }

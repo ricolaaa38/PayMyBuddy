@@ -2,6 +2,9 @@ package com.openclassrooms.paymybuddy.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -26,4 +29,8 @@ public class Transaction {
 
     @Column(nullable = false)
     private Double amount;
+
+    @CreationTimestamp
+    @Column(name = "date", nullable = false, updatable = false)
+    private LocalDateTime date;
 }

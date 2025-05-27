@@ -31,18 +31,7 @@ public class TransactionController {
                                     @RequestParam double amount,
                                     RedirectAttributes redirectAttributes) {
         try {
-
-            User sender = userService.getUserById(senderId)
-                    .orElseThrow(() -> new ControllerException("Expéditeur introuvable avec l'ID: " + senderId));
-            User receiver = userService.getUserById(receiverId)
-                    .orElseThrow(() -> new ControllerException("Destinataire introuvable avec l'ID: " + receiverId));
-
-            Transaction transaction = new Transaction();
-            transaction.setSender(sender);
-            transaction.setReceiver(receiver);
-            transaction.setDescription(description);
-            transaction.setAmount(amount);
-
+            Transaction transaction = getTransaction(senderId, receiverId, description, amount);
             transactionService.saveTransaction(transaction);
             redirectAttributes.addFlashAttribute("success", "Transaction envoyée avec succès !");
             return "redirect:/home";
@@ -50,6 +39,20 @@ public class TransactionController {
             redirectAttributes.addFlashAttribute("error", "Erreur lors de l'envoi de la transaction: " + e.getMessage());
             return "redirect:/home";
         }
+    }
+
+    private Transaction getTransaction(int senderId, int receiverId, String description, double amount) {
+        User sender = userService.getUserById(senderId)
+                .orElseThrow(() -> new ControllerException("Expéditeur introuvable avec l'ID: " + senderId));
+        User receiver = userService.getUserById(receiverId)
+                .orElseThrow(() -> new ControllerException("Destinataire introuvable avec l'ID: " + receiverId));
+
+        Transaction transaction = new Transaction();
+        transaction.setSender(sender);
+        transaction.setReceiver(receiver);
+        transaction.setDescription(description);
+        transaction.setAmount(amount);
+        return transaction;
     }
 
     @GetMapping("/sender")

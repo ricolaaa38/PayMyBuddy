@@ -15,6 +15,10 @@
         <a th:href="@{/logout}" th:classappend="${currentPath == '/logout'} ? 'active' : ''" title="logout button">Se déconnecter</a>
     </nav>
 </header>
+<div class="user-solde">
+    <p>Solde disponible :</p>
+    <p th:text="${user.solde} + '€'"></p>
+</div>
 <section class="create-transaction-container">
     <form th:action="@{/api/transactions/create}" method="post">
         <input type="hidden" name="senderId" th:value="${user.id}" />
@@ -57,6 +61,7 @@
             <th>Relations</th>
             <th>Description</th>
             <th>Montant</th>
+            <th>Date</th>
         </tr>
         </thead>
         <tbody>
@@ -64,6 +69,8 @@
             <td th:text="${transaction.receiver.username}"></td>
             <td th:text="${transaction.description}"></td>
             <td th:text="${transaction.amount + ' €'}"></td>
+            <td th:text="${#temporals.format(transaction.date, 'dd/MM/yyyy')}"></td>
+
         </tr>
         </tbody>
     </table>

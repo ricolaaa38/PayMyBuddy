@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 @Controller
-public class HomeController {
+public class HomePageController {
 
     @Autowired
     private UserService userService;

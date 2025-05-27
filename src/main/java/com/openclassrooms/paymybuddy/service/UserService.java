@@ -80,6 +80,10 @@ public class UserService {
                 previousUserInfo.setUsername(updatedUser.getUsername());
                 isModified = true;
             }
+            if (updatedUser.getSolde() > 0 && updatedUser.getSolde() != previousUserInfo.getSolde()) {
+                previousUserInfo.setSolde(updatedUser.getSolde());
+                isModified = true;
+            }
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty() && !passwordEncoderService.matches(updatedUser.getPassword(), previousUserInfo.getPassword())) {
                     previousUserInfo.setPassword(passwordEncoderService.encode(updatedUser.getPassword()));
                     isModified = true;

@@ -11,4 +11,8 @@ import java.util.List;
 public interface TransactionRepository extends CrudRepository<Transaction, Integer> {
     List<Transaction> findBySender(User sender);
     List<Transaction> findByReceiver(User receiver);
+
+    List<Transaction> findBySenderOrderByDateDesc(User sender);
+    List<Transaction> findByReceiverOrderByDateDesc(User receiver);
+
 }

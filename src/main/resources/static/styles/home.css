@@ -36,6 +36,27 @@ nav a {
 }
 
 /**
+* Solde div styles
+*/
+.user-solde {
+    position: absolute;
+    top: 100px;
+    right: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #007bff;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: white;
+    gap: 10px;
+}
+.user-solde p {
+    margin: 0;
+}
+
+/**
 * Container de formulaire de transfert
 */
 .create-transaction-container {
@@ -154,7 +175,9 @@ tbody tr {
 th, td {
     padding: 12px 8px;
 }
-
+thead tr th:last-child {
+    text-align: right;
+}
 td:last-child {
     text-align: right;
 }
