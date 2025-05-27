@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS paymybuddy;
+
+USE paymybuddy;
+
+CREATE TABLE IF NOT EXISTS User (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(32) NOT NULL,
+    email VARCHAR(128) UNIQUE NOT NULL,
+    password VARCHAR(256) NOT NULL,
+    solde DOUBLE DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Transaction (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    date DATETIME,
+    description TEXT,
+    amount DOUBLE NOT NULL,
+    FOREIGN KEY (sender_id) REFERENCES User(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES User(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS User_Connection (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    user2_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES User(id) ON DELETE CASCADE
+);

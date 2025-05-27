@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link rel="stylesheet" th:href="@{/styles/home.css}" />
+</head>
+<body>
+<header>
+    <h1>Pay My Buddy</h1>
+    <nav>
+        <a th:href="@{/home}" th:classappend="${currentPath == '/home'} ? 'active' : ''" title="home page link">Transférer</a>
+        <a th:href="@{/profil}" th:classappend="${currentPath == '/profil'} ? 'active' : ''" title="profil page link">Profil</a>
+        <a th:href="@{/connection}" th:classappend="${currentPath == '/connection'} ? 'active' : ''" title="user contact page link">Ajouter relation</a>
+        <a th:href="@{/logout}" th:classappend="${currentPath == '/logout'} ? 'active' : ''" title="logout button">Se déconnecter</a>
+    </nav>
+</header>
+<div class="user-solde">
+    <p>Solde disponible :</p>
+    <p th:text="${user.solde} + '€'"></p>
+</div>
+<section class="create-transaction-container">
+    <form th:action="@{/api/transactions/create}" method="post">
+        <input type="hidden" name="senderId" th:value="${user.id}" />
+        <div class="form-inputs">
+            <div class="label-and-input">
+                <label for="receiver"></label>
+                <select id="receiver" name="receiverId" required>
+                    <option value="" disabled selected>Sélectionner une relation</option>
+                    <option th:each="connection : ${connections}"
+                            th:value="${connection.user2.id}"
+                            th:text="${connection.user2.email}">
+                    </option>
+                </select>
+            </div>
+            <div class="label-and-input">
+                <label for="description"></label>
+                <input type="text" id="description" name="description" placeholder="Description" required />
+            </div>
+            <div class="label-and-input">
+                <label for="amount"></label>
+                <input type="number" id="amount" name="amount" placeholder="0" step="0.01" min="0" required />
+            </div>
+        </div>
+        <div class="submit-btn-container">
+            <button type="submit">Envoyer</button>
+        </div>
+        <div class="messages">
+            <p th:if="${error}" class="error-msg" th:text="${error}"></p>
+            <p th:if="${success}" class="success-msg" th:text="${success}"></p>
+        </div>
+    </form>
+
+</section>
+<section class="list-transaction-container">
+    <h2>Mes transactions</h2>
+    <div class="table-wrapper">
+    <table>
+        <thead>
+        <tr>
+            <th>Relations</th>
+            <th>Description</th>
+            <th>Montant</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="transaction : ${transactions}">
+            <td th:text="${transaction.receiver.username}"></td>
+            <td th:text="${transaction.description}"></td>
+            <td th:text="${transaction.amount + ' €'}"></td>
+            <td th:text="${#temporals.format(transaction.date, 'dd/MM/yyyy')}"></td>
+
+        </tr>
+        </tbody>
+    </table>
+    </div>
+</section>
+</body>
+</html>
