@@ -9,10 +9,10 @@
 <header>
     <h1>Pay My Buddy</h1>
     <nav>
-        <a th:href="@{/home}" th:classappend="${currentPath == '/home'} ? 'active' : ''" title="home page link">Transférer</a>
-        <a th:href="@{/profil}" th:classappend="${currentPath == '/profil'} ? 'active' : ''" title="profil page link">Profil</a>
-        <a th:href="@{/connection}" th:classappend="${currentPath == '/connection'} ? 'active' : ''" title="user contact page link">Ajouter relation</a>
-        <a th:href="@{/logout}" th:classappend="${currentPath == '/logout'} ? 'active' : ''" title="logout button">Se déconnecter</a>
+        <a th:href="@{/home}" th:classappend="${currentPath == '/home'} ? 'active' : ''" title="home page link" alt="link home page">Transférer</a>
+        <a th:href="@{/profil}" th:classappend="${currentPath == '/profil'} ? 'active' : ''" title="profil page link" alt="link profil page" >Profil</a>
+        <a th:href="@{/connection}" th:classappend="${currentPath == '/connection'} ? 'active' : ''" title="user contact page link" alt="link add relation page">Ajouter relation</a>
+        <a th:href="@{/logout}" th:classappend="${currentPath == '/logout'} ? 'active' : ''" title="logout button" alt="logout button">Se déconnecter</a>
     </nav>
 </header>
 <div class="user-solde">
@@ -66,12 +66,18 @@
         </thead>
         <tbody>
         <tr th:each="transaction : ${transactions}">
-            <td th:text="${transaction.receiver.username}"></td>
-            <td th:text="${transaction.description}"></td>
-            <td th:text="${transaction.amount + ' €'}"></td>
-            <td th:text="${#temporals.format(transaction.date, 'dd/MM/yyyy')}"></td>
-
+            <th:block th:with="
+        isSent=${transaction.sender.id == user.id},
+        displayAmount=${isSent} ? ${#strings.concat('-', transaction.amount, ' €')} : ${#strings.concat('+', transaction.amount, ' €')}
+    ">
+                <td th:text="${isSent} ? ${transaction.receiver.username} : ${transaction.sender.username}"></td>
+                <td th:text="${transaction.description}"></td>
+                <td th:text="${displayAmount}" th:class="${isSent} ? 'amount-negative' : 'amount-positive'"></td>
+                <td th:text="${#temporals.format(transaction.date, 'dd/MM/yyyy')}"></td>
+            </th:block>
         </tr>
+
+
         </tbody>
     </table>
     </div>
