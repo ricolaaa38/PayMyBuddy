@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository interface for managing UserConnection entities.
+ * Provides methods to find connections by user and between two users.
+ */
 @Repository
 public interface UserConnectionRepository extends CrudRepository<UserConnection, Integer> {
     List<UserConnection> findByUser1(User user1);

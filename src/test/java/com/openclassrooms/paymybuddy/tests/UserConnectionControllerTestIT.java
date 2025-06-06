@@ -1,7 +1,6 @@
-package com.openclassrooms.paymybuddy;
+package com.openclassrooms.paymybuddy.tests;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openclassrooms.paymybuddy.controllers.UserController;
+import com.openclassrooms.paymybuddy.config.TestSecurityConfig;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.model.UserConnection;
 import com.openclassrooms.paymybuddy.repository.UserConnectionRepository;
@@ -13,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,14 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
+@Import(TestSecurityConfig.class)
 public class UserConnectionControllerTestIT {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private UserConnectionService userConnectionService;
@@ -71,12 +69,11 @@ public class UserConnectionControllerTestIT {
 
     @Test
     public void testCreateUsersConnection() throws Exception {
-        String jsonContent = objectMapper.writeValueAsString(testUserConnection);
-
         mockMvc.perform(post("/api/users-connections/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonContent))
-                .andExpect(status().isCreated());
+                        .param("user1id", String.valueOf(user1.getId()))
+                        .param("user2Email", user2.getEmail())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().is3xxRedirection());
     }
 
     @Test
@@ -84,7 +81,7 @@ public class UserConnectionControllerTestIT {
         userConnectionService.saveUserConnection(testUserConnection);
 
         mockMvc.perform(get("/api/users-connections/")
-                .param("user1Id", String.valueOf(user1.getId())))
+                        .param("user1Id", String.valueOf(user1.getId())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
@@ -96,8 +93,8 @@ public class UserConnectionControllerTestIT {
         mockMvc.perform(delete("/api/users-connections/delete")
                         .param("user1Email", user1.getEmail())
                         .param("user2Email", user2.getEmail()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string("Connection successfully deleted"));
     }
-
-
 }
+

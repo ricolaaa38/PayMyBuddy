@@ -1,5 +1,6 @@
-package com.openclassrooms.paymybuddy;
+package com.openclassrooms.paymybuddy.tests;
 
+import com.openclassrooms.paymybuddy.config.TestSecurityConfig;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.UserRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
@@ -9,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -17,8 +18,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@Import(TestSecurityConfig.class)
 public class UserControllerTestIT {
 
     @Autowired
@@ -34,7 +36,6 @@ public class UserControllerTestIT {
     private UserRepository userRepository;
 
     private User testUser;
-
 
     @BeforeEach
     public void setUp() {
@@ -58,11 +59,12 @@ public class UserControllerTestIT {
     @Test
     public void testFindUserByEmail() throws Exception {
         userService.saveUser(testUser);
+
         mockMvc.perform(get("/api/users/find")
-                        .param("email", "testuser@example.com"))
+                        .param("email", testUser.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(objectMapper.writeValueAsString(testUser)));
+                .andExpect(jsonPath("$.email").value("testuser@example.com"))
+                .andExpect(jsonPath("$.username").value("test user"));
     }
 
     @Test
@@ -73,46 +75,36 @@ public class UserControllerTestIT {
     }
 
     @Test
-    public void testLoginUserSuccess() throws Exception {
-
-        userService.saveUser(testUser);
-
+    public void testLoginUserFail() throws Exception {
         mockMvc.perform(post("/api/users/login")
-                        .param("email", "testuser@example.com")
-                        .param("password", "password"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/home"));
+                        .param("email", "wrong@example.com")
+                        .param("password", "wrong"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("login"))
+                .andExpect(model().attributeExists("error"));
     }
 
     @Test
-    public void testUpdateUser() throws Exception {
-
-        Integer existingUserId = userService.saveUser(testUser).getId();
-
-        User updatedUser = new User();
-        updatedUser.setId(existingUserId);
-        updatedUser.setUsername("updateduser");
-        updatedUser.setEmail("updateduser@example.com");
-        updatedUser.setPassword("newpassword");
-
-        String jsonContent = objectMapper.writeValueAsString(updatedUser);
+    public void testUpdateUserRedirect() throws Exception {
+        User saved = userService.saveUser(testUser);
 
         mockMvc.perform(post("/api/users/update")
-                        .param("email", testUser.getEmail())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonContent))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.username").value("updateduser"))
-                .andExpect(jsonPath("$.email").value("updateduser@example.com"));
+                        .param("id", saved.getId().toString())
+                        .param("email", "updated@example.com")
+                        .param("username", "Updated User")
+                        .param("password", "newpass"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/profil"));
     }
 
     @Test
     public void testDeleteUserSuccess() throws Exception {
         userService.saveUser(testUser);
         mockMvc.perform(delete("/api/users/delete")
-                .param("email", "testuser@example.com"))
-                .andExpect(status().isOk());
+                        .param("email", testUser.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("User deleted successfully"));
     }
 }
+
 

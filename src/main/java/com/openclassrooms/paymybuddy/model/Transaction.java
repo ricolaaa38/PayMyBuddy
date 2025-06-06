@@ -6,7 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * Transaction Model
+ */
 @Entity
 @Table(name = "Transaction")
 @Data

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Service for managing the Users.
+ */
 @Service
 public class UserService {
 
@@ -18,8 +21,12 @@ public class UserService {
     @Autowired
     private PasswordEncoderService passwordEncoderService;
 
-//    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-
+    /**
+     * Retrieves all users from the repository.
+     *
+     * @return an iterable of all users
+     * @throws ServiceException if no users are found or if an error occurs during retrieval
+     */
     public Iterable<User> getUsers() {
         try {
             return userRepository.findAll();
@@ -28,6 +35,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves a user by their ID.
+     *
+     * @param id the ID of the user to retrieve
+     * @return an Optional containing the user if found, or empty if not found
+     * @throws ServiceException if an error occurs during retrieval
+     */
     public Optional<User> getUserById(Integer id) {
         try {
             return userRepository.findById(id);
@@ -37,6 +51,13 @@ public class UserService {
 
     }
 
+    /**
+     * Retrieves a user by their email.
+     *
+     * @param email the email of the user to retrieve
+     * @return an Optional containing the user if found, or empty if not found
+     * @throws ServiceException if an error occurs during retrieval
+     */
     public Optional<User> getUserByEmail(String email) {
         try {
             return Optional.ofNullable(userRepository.findByEmail(email));
@@ -45,6 +66,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Saves a user to the repository.
+     *
+     * @param user the user to save
+     * @return the saved user
+     * @throws ServiceException if an error occurs during saving
+     */
     public User saveUser(User user) {
         try {
             user.setPassword(passwordEncoderService.encode(user.getPassword()));
@@ -54,16 +82,27 @@ public class UserService {
         }
     }
 
+    /**
+     * Compares a raw password with an encoded password.
+     *
+     * @param rawPassword the raw password to compare
+     * @param encodedPassword the encoded password to compare against
+     * @return true if the passwords match, false otherwise
+     */
     public boolean comparePasswords(String rawPassword, String encodedPassword) {
         return passwordEncoderService.matches(rawPassword, encodedPassword);
     }
 
+    /**
+     * Updates a user's information.
+     *
+     * @param updatedUser the user with updated information
+     * @param previousUserInfo the user with previous information
+     * @return the updated user if any field was modified, null otherwise
+     * @throws ServiceException if an error occurs during updating
+     */
     public User updateUser(User updatedUser, User previousUserInfo ) {
         try {
-
-//            logger.debug("Received updatedUser: {}", updatedUser);
-//            logger.debug("Existing previousUserInfo: {}", previousUserInfo);
-
             if (updatedUser.getId() == null) {
                 throw new ServiceException("User ID is required for updating user information");
             }
@@ -96,6 +135,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Deletes a user from the repository.
+     *
+     * @param user the user to delete
+     * @throws ServiceException if an error occurs during deletion
+     */
     public void deleteUser(User user) {
         try {
             userRepository.delete(user);

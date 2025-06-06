@@ -3,6 +3,9 @@ package com.openclassrooms.paymybuddy.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+/**
+ * User connection/relation model
+ */
 @Entity
 @Table(name = "User_Connection")
 @Data

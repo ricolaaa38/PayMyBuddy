@@ -10,12 +10,12 @@
     <div class="register-box">
         <form th:action="@{/api/users/register}" method="post">
             <div class="homepage-button">
-                <button type="button">Pay My Buddy</button>
+                <button type="button" aria-hidden="true">Pay My Buddy</button>
             </div>
             <div class="form-inputs">
-                <label for="username"></label><input type="text" id="username" name="username" placeholder="Username" required>
-                <label for="email"></label><input type="email" id="email" name="email" placeholder="Mail" required>
-                <label for="password"></label><input type="password" id="password" name="password" placeholder="Mot de passe" required>
+                <label for="username" class="sr-only">Username</label><input type="text" id="username" name="username" placeholder="Username" required>
+                <label for="email" class="sr-only">Email</label><input type="email" id="email" name="email" placeholder="Mail" required>
+                <label for="password" class="sr-only">Password</label><input type="password" id="password" name="password" placeholder="Mot de passe" required>
             </div>
             <button type="submit" class="submit-btn">S'inscrire</button>
             <div class="messages">

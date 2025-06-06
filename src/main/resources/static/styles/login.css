@@ -39,6 +39,7 @@ body {
 }
 
 form {
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
@@ -67,6 +68,18 @@ form {
 
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .form-inputs {
     display: flex;
     flex-direction: column;
@@ -90,6 +103,13 @@ form {
     border-radius: 5px;
     cursor: pointer;
     width: 50%;
+}
+
+form .submit-btn {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%);
 }
 
 .submit-btn:hover {

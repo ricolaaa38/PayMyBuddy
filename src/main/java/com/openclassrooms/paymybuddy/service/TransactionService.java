@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ *Service for managing transactions.
+ */
 @Service
 public class TransactionService {
 
@@ -20,6 +23,13 @@ public class TransactionService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Saves a transaction after validating the sender's balance.
+     *
+     * @param transaction the transaction to save
+     * @return the saved transaction
+     * @throws ServiceException if the sender's balance is insufficient or if an error occurs during saving
+     */
     @Transactional
     public Transaction saveTransaction(Transaction transaction) {
         try {
@@ -41,6 +51,13 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Retrieves all transactions made by a specific sender.
+     *
+     * @param sender the user who sent the transactions
+     * @return a list of transactions made by the sender
+     * @throws ServiceException if an error occurs during retrieval
+     */
     public List<Transaction> getTransactionBySender(User sender) {
         try {
             return transactionRepository.findBySenderOrderByDateDesc(sender);
@@ -49,6 +66,13 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Retrieves all transactions received by a specific user.
+     *
+     * @param receiver the user who received the transactions
+     * @return a list of transactions received by the user
+     * @throws ServiceException if an error occurs during retrieval
+     */
     public List<Transaction> getTransactionByReceiver(User receiver) {
         try {
             return transactionRepository.findByReceiverOrderByDateDesc(receiver);

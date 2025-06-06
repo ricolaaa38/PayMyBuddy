@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing Transaction entities.
+ * Provides methods to perform CRUD operations on Transaction data.
+ */
 @Repository
 public interface TransactionRepository extends CrudRepository<Transaction, Integer> {
     List<Transaction> findBySender(User sender);
